@@ -1,0 +1,66 @@
+#!/bin/sh
+
+[[ $1 == -* ]] && {
+    echo "Usage: $0 [version]"
+    echo "在指定version时，使用指定值升级版本，version格式：^[0-9][0-9.]+[A-Za-z-]*$"
+    echo "未指定version时，若在master分支则自动计算下个版本号进行升级，而在其他分支则直接使用分支名作为版本号进行升级"
+    exit 0
+}
+
+# 获取 项目根路径
+#root=$(cd $(dirname $0)/.. && pwd)
+cd $(dirname $0)/..
+echo "\033[35;7m Project root path : \033[35;0m $(pwd) \033[0m"
+
+
+# 获取 分支名称 (指定的git项目的当前分支(branch)或标签名(tag))
+branch=$(git -C . rev-parse --abbrev-ref HEAD | grep -v HEAD ||
+        \git -C . describe --tags HEAD ||
+        \git -C . rev-parse HEAD)
+echo "\033[95;7m Git  branch  name : \033[35;0m $branch \033[0m"
+
+# 同步 POM 版本
+#mvn versions:update-child-modules
+
+# 获取 POM 版本
+version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+[[ -z ${version} ]] && { echo "\033[31;7m[ERROR] Fetch the current pom version error! \033[0m"; exit 1; }
+echo "\033[34;7m Current pom version : \033[34;0m $version \033[0m"
+
+# 预设 POM 版本
+if [[ $# > 0 ]]; then
+    # 指定了version时
+    target=$1
+else
+    # 未指定version时
+    if [[ "$branch" = "master" ]]; then
+        # 如果是master分支则自动计算新的版本号
+        vs=(${version//[.-]/ })
+        # >>计算规则：`a.b.**` --> `a.(b+1).0-SNAPSHOT`
+        #target="${vs[0]}.$((10#${vs[1]}+1)).0-SNAPSHOT"
+        # >>计算规则：`a.b(.*)` --> `a.(b+1)(.*)`
+        vs[1]=$((10#${vs[1]}+1))
+        for vv in ${vs[@]}
+        do
+            if echo ${vv} | grep -q '[^0-9]'; then
+                target="$target-$vv"
+            else
+                target="$target.$vv"
+            fi
+        done
+        target=${target:1}
+    else
+        # 如果不是master分支，则使用分支名作为版本号
+        target=${branch}
+    fi
+fi
+[[ ! ${target} =~ ^[0-9][0-9.]+[A-Za-z-]*$ ]] && echo "\033[31;7m[ERROR] Preset the target pom version error: $target \033[0m" && exit 1
+echo "\033[94;7m !Target pom version : \033[34;0m $target \033[0m"
+
+# 执行版本更新
+mvn versions:set -DnewVersion=${target} -f pom.xml
+mvn versions:commit
+find . -name "Dockerfile" | xargs gsed -i -r "s/(version[ ]*=[ ]*)['\"][0-9.]+[A-Za-z-]*['\"]/\1\"$target\"/g"
+find . -name "Jenkinsfile.groovy" | xargs gsed -i -r "s/(version[ ]*=[ ]*)['\"][0-9.]+[A-Za-z-]*['\"]/\1\"$target\"/g"
+
+echo "\033[32;7m[!] Change version complete. \033[0m"

@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: acline.base.util.acLineMain
+Class-Path: guava-21.0.jar hutool-all-5.8.9.jar slf4j-api-2.0.3.jar
+

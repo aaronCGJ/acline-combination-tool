@@ -1,0 +1,37 @@
+### 帮助文档    https://blog.csdn.net/M_Q_L_/article/details/104895135
+#######################################################################################
+### 模拟登陆请求
+POST {{baseUrl}}/sso/mock/login
+Content-Type: application/json
+
+{
+  "email": "aaron.chen@zenlayer.com",
+  "expireMin": 720
+}
+
+> {% client.global.set("authToken", response.body.data.token); %}
+
+
+#######################################################################################
+### Spring Actuator
+### >> Basic Data
+GET {{baseUrl}}{{basicData}}/actuator/health
+### >> Dashboard
+GET {{baseUrl}}{{dashboard}}/actuator/health
+### >> Metadata
+GET {{baseUrl}}{{metadata}}/actuator/health
+### >> Notification
+GET {{baseUrl}}{{notification}}/actuator/health
+### >> Project Management
+GET {{baseUrl}}{{projectManagement}}/actuator/health
+### >> Report
+GET {{baseUrl}}{{report}}/actuator/health
+### >> Resource
+GET {{baseUrl}}{{resource}}/actuator/health
+### >> Vendor
+GET {{baseUrl}}{{vendor}}/actuator/health
+### >> Workflow
+GET {{baseUrl}}{{workflow}}/actuator/health
+
+
+### END ###############################################################################
