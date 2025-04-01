@@ -7,15 +7,10 @@ import jxl.format.Alignment;
 import jxl.format.Border;
 import jxl.format.BorderLineStyle;
 import jxl.format.Colour;
-import jxl.format.UnderlineStyle;
 import jxl.format.VerticalAlignment;
-import jxl.write.Label;
-import jxl.write.Number;
-import jxl.write.WritableCellFormat;
-import jxl.write.WritableFont;
+import jxl.format.*;
+import jxl.write.*;
 import jxl.write.WritableFont.FontName;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
 
 import java.io.File;
 import java.io.FileOutputStream;
