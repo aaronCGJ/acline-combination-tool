@@ -32,7 +32,7 @@ public class ObjectUtils {
     public static final Object NULL = new Serializable() {
         private static final long serialVersionUID = 7092611880189329093L;
 
-        private Object readResolve() {
+        private Object readolve() {
             return NULL;
         }
     };
